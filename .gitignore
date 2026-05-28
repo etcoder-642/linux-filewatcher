@@ -8,6 +8,7 @@
 *.obj
 filewatcher
 *.txt
+.vscode/
 
 # Precompiled Headers
 *.gch
