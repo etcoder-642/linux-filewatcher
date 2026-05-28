@@ -71,9 +71,10 @@ handle_events(int fd, int *wd, int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
+    char buf;
     int fd, i, poll_num;
     int *wd;
-    struct pollfd fds[1];
+    struct pollfd fds[2];
     nfds_t nfds;
 
     if (argc < 2)
@@ -96,6 +97,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    printf("Press Enter to exit\n");
     printf("Watching ");
     for (int i = 1; i < argc; i++)
     {
@@ -111,11 +113,12 @@ int main(int argc, char *argv[])
     printf("\n");
 
 
-    nfds = 1;
+    nfds = 2;
     fds[0].fd = fd;
     fds[0].events = POLLIN;
+    fds[1].fd = STDIN_FILENO;
+    fds[1].events = POLLIN;
 
-    printf("Press Ctrl+C to exit\n");
     printf("Listening for events...\n");
     while (true)
     {
@@ -134,10 +137,20 @@ int main(int argc, char *argv[])
             {
                 handle_events(fd, wd, argc, argv);
             }
+            
+            if(fds[1].revents & POLLIN)
+            {
+                while( read(STDIN_FILENO, &buf, 1) > 0 && buf != '\n')
+                    continue;
+                break;
+            }
         }
     }
+    printf("Exiting...\n");
+
     close(fd);
     free(wd);
     exit(EXIT_SUCCESS);
+    
     return 0;
 }
